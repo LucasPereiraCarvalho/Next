@@ -2,13 +2,19 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import styles from "./styles.module.css";
 
+import { addDoc, collection } from "firebase/firestore";
 import { getSession } from "next-auth/react";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { FiShare2 } from "react-icons/fi";
 import { Textarea } from "../../components/textarea";
+import { db } from "../../services/firebaseConnection";
 
-export default function Dashboard() {
+interface HomeProps {
+  user: { email: string };
+}
+
+export default function Dashboard({ user }: HomeProps) {
   const [input, setInput] = useState("");
   const [publickTask, setPublickTask] = useState(false);
 
@@ -16,12 +22,24 @@ export default function Dashboard() {
     setPublickTask(e.target.checked);
   }
 
-  function handleRegisterTask(e: FormEvent<HTMLFormElement>) {
+  async function handleRegisterTask(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if(input === "") return;
+    if (input === "") return;
 
-    alert("test")
+    try {
+      await addDoc(collection(db, "tarefas"), {
+        tarefas: input,
+        create: new Date(),
+        user: user?.email,
+        public: publickTask,
+      });
+
+      setInput("");
+      setPublickTask(false);
+    } catch (err) {
+      console.log("Error: ", err);
+    }
   }
 
   return (
@@ -97,6 +115,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   }
 
   return {
-    props: {},
+    props: { user: { email: session?.user?.email } },
   };
 };
