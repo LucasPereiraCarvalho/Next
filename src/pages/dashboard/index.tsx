@@ -37,6 +37,13 @@ export default function Dashboard({ user }: HomeProps) {
   const [publickTask, setPublickTask] = useState(false);
   const [tasks, setTasks] = useState<TaskProps[]>([]);
 
+  // Assim como o getServerSideProps é utilizado para buscar dados no lado do servidor (SSR),
+  // o useEffect é utilizado para buscar dados no lado do cliente (CSR).
+  // Diferenças:
+  // - getServerSideProps: executa no servidor antes da página ser renderizada,
+  //   os dados já chegam prontos para o componente, bom para SEO.
+  // - useEffect: executa no cliente após a página ser renderizada,
+  //   os dados são carregados após o componente ser montado, pode causar um "flash" de conteúdo vazio.
   useEffect(() => {
     async function loadtarefas() {
       const tarefasRef = collection(db, "tarefas");

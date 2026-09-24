@@ -40,6 +40,7 @@ export default function Task({ item, allComents }: TaskProps) {
   const [input, setInput] = useState("");
   const [comments, setComments] = useState<CommentProps[]>(allComents || []);
 
+
   async function handleComment(event: FormEvent) {
     event.preventDefault();
 
@@ -138,7 +139,9 @@ export default function Task({ item, allComents }: TaskProps) {
     </div>
   );
 }
-
+// O getServerSideProps é executado no servidor a cada requisição da página.
+// Ele serve para buscar dados dinâmicos ou fazer validações antes de renderizar
+// o componente, enviando os dados já prontos como props para o navegador.
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const id = params?.id as string;
   const docRef = doc(db, "tarefas", id);
