@@ -2,9 +2,16 @@ import { GetServerSideProps } from "next";
 import Head from "next/head";
 import styles from "./styles.module.css";
 
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { getSession } from "next-auth/react";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { FiShare2 } from "react-icons/fi";
 import { Textarea } from "../../components/textarea";
@@ -14,9 +21,48 @@ interface HomeProps {
   user: { email: string };
 }
 
+interface TaskProps {
+  id: string;
+  tarefas: string;
+  created: Date;
+  user: string;
+  public: boolean;
+}
+
 export default function Dashboard({ user }: HomeProps) {
   const [input, setInput] = useState("");
   const [publickTask, setPublickTask] = useState(false);
+  const [tasks, setTasks] = useState<TaskProps[]>([]);
+
+  useEffect(() => {
+    async function loadtarefas() {
+      const tarefasRef = collection(db, "tarefas");
+      const q = query(
+        tarefasRef,
+        orderBy("created", "desc"),
+        where("user", "==", user?.email)
+      );
+
+      onSnapshot(q, (snapshot) => {
+        let lista = [] as TaskProps[];
+
+        snapshot.forEach((doc) => {
+          lista.push({
+            id: doc.id,
+            tarefas: doc.data().tarefas,
+            created: doc.data().created,
+            user: doc.data().user,
+            public: doc.data().public,
+          });
+        });
+
+        setTasks(lista);
+        console.log("lista: ", lista);
+      });
+    }
+
+    loadtarefas();
+  }, [user?.email]);
 
   function handleChangePublic(e: ChangeEvent<HTMLInputElement>) {
     setPublickTask(e.target.checked);
@@ -30,7 +76,7 @@ export default function Dashboard({ user }: HomeProps) {
     try {
       await addDoc(collection(db, "tarefas"), {
         tarefas: input,
-        create: new Date(),
+        created: new Date(),
         user: user?.email,
         public: publickTask,
       });
@@ -79,21 +125,25 @@ export default function Dashboard({ user }: HomeProps) {
         <section className={styles.taskContainer}>
           <h1>Minhas tarefas</h1>
 
-          <article className={styles.task}>
-            <div className={styles.tagContainer}>
-              <label className={styles.tag}>PUBLICO</label>
-              <button className={styles.shareButton}>
-                <FiShare2 size={22} color="#3183ff" />
-              </button>
-            </div>
+          {tasks.map((item) => (
+            <article key={item.id} className={styles.task}>
+              {item.public && (
+                <div className={styles.tagContainer}>
+                  <label className={styles.tag}>PUBLICO</label>
+                  <button className={styles.shareButton}>
+                    <FiShare2 size={22} color="#3183ff" />
+                  </button>
+                </div>
+              )}
 
-            <div className={styles.taskContent}>
-              <p>Minha primeira tarefa de exemplo show demais!</p>
-              <button className={styles.trashButton}>
-                <FaTrash size={24} color="#ea3140" />
-              </button>
-            </div>
-          </article>
+              <div className={styles.taskContent}>
+                <p>{item.tarefas}</p>
+                <button className={styles.trashButton}>
+                  <FaTrash size={24} color="#ea3140" />
+                </button>
+              </div>
+            </article>
+          ))}
         </section>
       </main>
     </div>
