@@ -1,0 +1,40 @@
+.container {
+  background-color: #0f0f0f;
+  width: 100%;
+  height: calc(100vh - 76px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logoContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  max-width: 480px;
+  object-fit: contain;
+  width: auto;
+  height: auto;
+}
+
+.title {
+  color: #fff;
+}
+
+.infoContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.box {
+  background-color: #fafafa;
+  border-radius: 4px;
+  padding: 14px 14px;
+}
+
+.box:hover {
+  transform: scale(1.08);
+}
