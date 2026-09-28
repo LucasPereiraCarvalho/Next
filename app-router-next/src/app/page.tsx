@@ -17,9 +17,24 @@ interface DataProps {
 //   return response.json();
 // }
 
+/**
+ * Opções de cache para o fetch:
+ * - 'force-cache': (padrão) Armazena a resposta em cache e a reutiliza nas requisições subsequentes (comportamento SSG)
+ * - 'no-store': Nunca armazena a resposta em cache, sempre busca do servidor (comportamento SSR)
+ * - 'no-cache': Revalida o cache a cada requisição
+ * - 'reload': Ignora o cache e o atualiza com a nova resposta
+ * - 'default': Utiliza o comportamento de cache padrão do navegador
+ * - 'only-if-cached': Utiliza o cache apenas se disponível, caso contrário falha
+ *
+ * Opções do next.revalidate:
+ * - 0: Revalida a cada requisição (comportamento SSR)
+ * - false: Nunca revalida (cache permanente, comportamento SSG)
+ * - N (número em segundos): Revalida após N segundos (comportamento ISR)
+ */
 async function getData() {
   const response = await fetch(
-    "https://api.github.com/users/LucasPereiraCarvalho/repos"
+    "https://api.github.com/users/LucasPereiraCarvalho/repos",
+    { cache: "force-cache", next: { revalidate: 60 } }
   );
   return response.json();
 }
